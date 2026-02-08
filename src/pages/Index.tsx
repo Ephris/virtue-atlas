@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Map, MessageSquare, ClipboardList, Sparkles } from "lucide-react";
+import { Map, MessageSquare, ClipboardList, Sparkles, ChevronUp, ChevronDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatsBar from "@/components/StatsBar";
@@ -14,18 +14,56 @@ import { Badge } from "@/components/ui/badge";
 const Index = () => {
   const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
   const [activeTab, setActiveTab] = useState("map");
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      {/* Header - fixed height */}
-      <div className="shrink-0">
-        <DashboardHeader />
+      {/* Collapsible Header/Stats on mobile */}
+      <AnimatePresence initial={false}>
+        {!headerCollapsed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="shrink-0 overflow-hidden lg:!h-auto lg:!opacity-100"
+          >
+            {/* Header - fixed height */}
+            <DashboardHeader />
+            
+            {/* Stats Bar - fixed height */}
+            <StatsBar />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop always shows header/stats */}
+      <div className="hidden lg:block shrink-0">
+        {headerCollapsed && (
+          <>
+            <DashboardHeader />
+            <StatsBar />
+          </>
+        )}
       </div>
-      
-      {/* Stats Bar - fixed height */}
-      <div className="shrink-0">
-        <StatsBar />
-      </div>
+
+      {/* Toggle button for mobile */}
+      <button
+        onClick={() => setHeaderCollapsed(!headerCollapsed)}
+        className="lg:hidden shrink-0 flex items-center justify-center gap-1 w-full py-1 text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/50 border-b border-border bg-card transition-colors"
+      >
+        {headerCollapsed ? (
+          <>
+            <ChevronDown className="h-3 w-3" />
+            Show header
+          </>
+        ) : (
+          <>
+            <ChevronUp className="h-3 w-3" />
+            Hide header
+          </>
+        )}
+      </button>
 
       {/* Main content area - takes remaining space */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
