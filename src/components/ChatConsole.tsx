@@ -61,6 +61,9 @@ const ChatConsole = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [responseTime, setResponseTime] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  
+  // Hide Quick Queries when conversation is active (user has sent messages)
+  const hasConversation = messages.some(msg => msg.role === "user");
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -204,12 +207,14 @@ const ChatConsole = () => {
         </div>
       </div>
 
-      {/* Quick Queries - fixed below header, NOT inside scroll area */}
-      <QuickQueryBar
-        queries={quickQueries}
-        onQueryClick={handleSend}
-        disabled={isLoading}
-      />
+      {/* Quick Queries - only show when no active conversation */}
+      {!hasConversation && (
+        <QuickQueryBar
+          queries={quickQueries}
+          onQueryClick={handleSend}
+          disabled={isLoading}
+        />
+      )}
 
       {/* Messages - scrollable, takes remaining space */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
