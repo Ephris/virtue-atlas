@@ -5,6 +5,7 @@ import { dashboardStats } from "@/data/mockData";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface DashboardHeaderProps {
   onUploadClick?: () => void;
@@ -106,6 +107,11 @@ const DashboardHeader = ({ onUploadClick }: DashboardHeaderProps) => {
             <Upload className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Upload</span>
           </Button>
+        </motion.div>
+
+        {/* Theme Toggle */}
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <ThemeToggle />
         </motion.div>
 
         {/* Notifications */}
