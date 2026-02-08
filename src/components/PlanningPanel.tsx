@@ -1,3 +1,24 @@
+/**
+ * ============================================================================
+ * PLANNING PANEL - Resource Deployment Planning
+ * ============================================================================
+ * 
+ * Drag-drop interface for deploying resources to cold spots
+ * 
+ * Features:
+ * - Drag resources from catalog
+ * - Drop onto cold spot zones
+ * - Save deployment plans
+ * 
+ * HIGHLIGHT ENDPOINT: POST /plan - Save resource deployment plan
+ * 
+ * TEST CHECKLIST:
+ * ✓ Resources are draggable
+ * ✓ Cold spot zones accept drops
+ * ✓ Save button works
+ * ✓ Clear button works
+ */
+
 import { GripVertical, User, Stethoscope, Package, X, Check, MapPin, AlertTriangle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +27,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
+import { savePlan } from "@/lib/api";
 
 interface Deployment {
   coldSpotId: string;

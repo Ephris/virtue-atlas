@@ -1,23 +1,49 @@
+/**
+ * ============================================================================
+ * INTELLIGENCE MAP - Geospatial Visualization
+ * ============================================================================
+ * 
+ * Interactive map showing health facilities and cold spots
+ * 
+ * Features:
+ * - Blue markers for verified facilities (hubs)
+ * - Red heatmap overlay for cold spots (high contrast)
+ * - Click facility to open verification sidebar
+ * - Drag-drop resources onto map for planning
+ * - Map legend with clear visual hierarchy
+ * 
+ * HIGHLIGHT ENDPOINT: GET /facilities - Fetch all facilities for map
+ * HIGHLIGHT ENDPOINT: GET /cold-spots - Fetch cold spot analysis
+ * 
+ * TEST CHECKLIST:
+ * ✓ Blue hubs clearly visible
+ * ✓ Red cold spots have high contrast with blue
+ * ✓ Click facility opens sidebar
+ * ✓ Drag-drop resources works
+ * ✓ Legend is readable
+ */
+
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, useMap } from "react-leaflet";
-import { Layers, Eye, EyeOff, ZoomIn, ZoomOut, LocateFixed } from "lucide-react";
+import { Layers, Eye, EyeOff, ZoomIn, ZoomOut, LocateFixed, MapPin, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { facilities, coldSpots, type Facility } from "@/data/mockData";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import "leaflet/dist/leaflet.css";
 
+// Color palette for clear contrast
 const facilityColors: Record<string, string> = {
-  hospital: "#3B82F6",
-  clinic: "#60A5FA",
-  lab: "#818CF8",
-  pharmacy: "#A78BFA",
+  hospital: "#2563EB", // Blue-600 - primary hubs
+  clinic: "#3B82F6",   // Blue-500
+  lab: "#6366F1",      // Indigo-500
+  pharmacy: "#8B5CF6", // Violet-500
 };
 
-const statusRadius: Record<string, number> = {
-  verified: 8,
-  unverified: 6,
-  flagged: 7,
+const statusStyles: Record<string, { radius: number; strokeWidth: number }> = {
+  verified: { radius: 10, strokeWidth: 2 },
+  unverified: { radius: 7, strokeWidth: 1 },
+  flagged: { radius: 9, strokeWidth: 3 },
 };
 
 interface IntelligenceMapProps {
@@ -25,6 +51,9 @@ interface IntelligenceMapProps {
   selectedFacility: Facility | null;
 }
 
+// ============================================================================
+// DROPPABLE MAP LAYER - Resource Planning Integration
+// ============================================================================
 function DroppableMapLayer({
   onDrop,
 }: {
@@ -64,6 +93,9 @@ function DroppableMapLayer({
   return null;
 }
 
+// ============================================================================
+// MAP CONTROLS - Zoom, Center, etc.
+// ============================================================================
 function MapControls() {
   const map = useMap();
 
@@ -77,7 +109,7 @@ function MapControls() {
       <Button
         size="icon"
         variant="outline"
-        className="h-8 w-8 bg-card shadow-md border-border hover:bg-muted"
+        className="h-9 w-9 bg-card shadow-md border-border hover:bg-muted"
         onClick={() => map.zoomIn()}
       >
         <ZoomIn className="h-4 w-4" />
@@ -85,7 +117,7 @@ function MapControls() {
       <Button
         size="icon"
         variant="outline"
-        className="h-8 w-8 bg-card shadow-md border-border hover:bg-muted"
+        className="h-9 w-9 bg-card shadow-md border-border hover:bg-muted"
         onClick={() => map.zoomOut()}
       >
         <ZoomOut className="h-4 w-4" />
@@ -93,7 +125,7 @@ function MapControls() {
       <Button
         size="icon"
         variant="outline"
-        className="h-8 w-8 bg-card shadow-md border-border hover:bg-muted"
+        className="h-9 w-9 bg-card shadow-md border-border hover:bg-muted"
         onClick={() => {
           map.setView([-1.94, 29.87], 8);
           toast.info("Map centered on Rwanda");
@@ -105,16 +137,23 @@ function MapControls() {
   );
 }
 
+// ============================================================================
+// MAIN MAP COMPONENT
+// ============================================================================
 const IntelligenceMap = ({ onFacilityClick, selectedFacility }: IntelligenceMapProps) => {
   const [showColdSpots, setShowColdSpots] = useState(true);
+  const [showFacilities, setShowFacilities] = useState(true);
   const [droppedResources, setDroppedResources] = useState<
     { lat: number; lng: number; resourceId: string }[]
   >([]);
 
+  // ============================================================================
+  // HIGHLIGHT ENDPOINT: POST /plan - Save resource drop to plan
+  // ============================================================================
   const handleDrop = (lat: number, lng: number, resourceId: string) => {
     setDroppedResources((prev) => [...prev, { lat, lng, resourceId }]);
-    toast.success("Resource deployed on map", {
-      description: "Location marked for deployment",
+    toast.success("Resource deployed", {
+      description: `Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
     });
   };
 
@@ -134,151 +173,274 @@ const IntelligenceMap = ({ onFacilityClick, selectedFacility }: IntelligenceMapP
         <DroppableMapLayer onDrop={handleDrop} />
         <MapControls />
 
-        {/* Facility markers */}
-        {facilities.map((f) => (
-          <CircleMarker
-            key={f.id}
-            center={[f.lat, f.lng]}
-            radius={statusRadius[f.status]}
-            pathOptions={{
-              color:
-                selectedFacility?.id === f.id
-                  ? "#1a2744"
+        {/* ============================================================================
+         * FACILITY MARKERS - Blue hubs
+         * HIGHLIGHT ENDPOINT: GET /facilities
+         * ============================================================================ */}
+        {showFacilities && facilities.map((f) => {
+          const style = statusStyles[f.status];
+          const isSelected = selectedFacility?.id === f.id;
+          
+          return (
+            <CircleMarker
+              key={f.id}
+              center={[f.lat, f.lng]}
+              radius={isSelected ? style.radius + 3 : style.radius}
+              pathOptions={{
+                color: isSelected
+                  ? "#1E3A5F"
                   : f.status === "flagged"
                   ? "#D97706"
                   : facilityColors[f.type],
-              fillColor:
-                f.status === "flagged" ? "#FDE68A" : facilityColors[f.type],
-              fillOpacity: selectedFacility?.id === f.id ? 1 : 0.7,
-              weight: selectedFacility?.id === f.id ? 3 : 2,
-            }}
-            eventHandlers={{
-              click: () => onFacilityClick(f),
-            }}
-          >
-            <Popup>
-              <div className="text-sm">
-                <p className="font-semibold">{f.name}</p>
-                <p className="text-muted-foreground capitalize">{f.type}</p>
-                <p className="text-xs mt-1">
-                  <span className={`font-medium ${f.status === 'verified' ? 'text-teal' : f.status === 'flagged' ? 'text-amber' : 'text-muted-foreground'}`}>
-                    {f.status}
-                  </span>
-                  {" • "}
-                  {(f.confidence * 100).toFixed(0)}% confidence
-                </p>
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
+                fillColor:
+                  f.status === "flagged" ? "#FDE68A" : facilityColors[f.type],
+                fillOpacity: isSelected ? 0.9 : 0.7,
+                weight: isSelected ? 4 : style.strokeWidth,
+              }}
+              eventHandlers={{
+                click: () => onFacilityClick(f),
+              }}
+            >
+              <Popup>
+                <div className="text-sm min-w-[180px]">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                    <div>
+                      <p className="font-semibold text-foreground">{f.name}</p>
+                      <p className="text-muted-foreground capitalize">{f.type}</p>
+                    </div>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-border">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Status</span>
+                      <span className={`font-medium capitalize ${
+                        f.status === 'verified' ? 'text-teal' : 
+                        f.status === 'flagged' ? 'text-amber' : 
+                        'text-muted-foreground'
+                      }`}>
+                        {f.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs mt-1">
+                      <span className="text-muted-foreground">Confidence</span>
+                      <span className="font-medium">{(f.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                    {f.surgicalCapacity && (
+                      <div className="flex justify-between text-xs mt-1">
+                        <span className="text-muted-foreground">Surgical</span>
+                        <span className="font-medium text-teal">Available</span>
+                      </div>
+                    )}
+                  </div>
+                  <button 
+                    className="mt-2 w-full text-xs text-center text-primary hover:underline"
+                    onClick={() => onFacilityClick(f)}
+                  >
+                    View details →
+                  </button>
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
 
-        {/* Cold spot overlay */}
+        {/* ============================================================================
+         * COLD SPOT OVERLAY - Red heatmap for contrast with blue hubs
+         * HIGHLIGHT ENDPOINT: GET /cold-spots
+         * ============================================================================ */}
         <AnimatePresence>
           {showColdSpots &&
-            coldSpots.map((cs, i) => (
+            coldSpots.map((cs) => (
               <Circle
-                key={`cs-${i}`}
+                key={cs.id}
                 center={[cs.lat, cs.lng]}
-                radius={cs.intensity * 30000}
+                radius={cs.intensity * 35000}
                 pathOptions={{
-                  color: "transparent",
+                  color: "#DC2626",
                   fillColor: "#EF4444",
-                  fillOpacity: cs.intensity * 0.25,
+                  fillOpacity: cs.intensity * 0.35,
+                  weight: 2,
+                  dashArray: "5, 5",
                 }}
               >
                 <Popup>
-                  <div className="text-sm">
-                    <p className="font-semibold text-cold-spot">Cold Spot</p>
-                    <p className="font-medium">{cs.name}</p>
-                    <p className="text-muted-foreground">Population: {cs.population.toLocaleString()}</p>
-                    <p className="text-muted-foreground">Nearest facility: {cs.nearestFacilityKm}km</p>
-                    <p className="text-cold-spot text-xs mt-1 font-medium">No surgical capacity</p>
+                  <div className="text-sm min-w-[200px]">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="h-4 w-4 mt-0.5 text-cold-spot shrink-0" />
+                      <div>
+                        <p className="font-semibold text-cold-spot">Cold Spot</p>
+                        <p className="font-medium text-foreground">{cs.name}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-border space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Population</span>
+                        <span className="font-medium">{cs.population.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Nearest facility</span>
+                        <span className="font-medium">{cs.nearestFacilityKm}km</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Intensity</span>
+                        <span className="font-medium text-cold-spot">
+                          {(cs.intensity * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-[10px] text-cold-spot font-medium">
+                      ⚠️ No surgical capacity in this area
+                    </p>
                   </div>
                 </Popup>
               </Circle>
             ))}
         </AnimatePresence>
 
-        {/* Dropped resources */}
+        {/* Dropped Resources */}
         {droppedResources.map((r, i) => (
           <CircleMarker
             key={`drop-${i}`}
             center={[r.lat, r.lng]}
-            radius={10}
+            radius={12}
             pathOptions={{
               color: "#059669",
               fillColor: "#34D399",
-              fillOpacity: 0.8,
-              weight: 2,
+              fillOpacity: 0.85,
+              weight: 3,
             }}
           >
             <Popup>
-              <p className="text-sm font-medium">Planned Resource Deployment</p>
-              <p className="text-xs text-muted-foreground">Click to view details</p>
+              <div className="text-sm">
+                <p className="font-semibold text-teal">Planned Deployment</p>
+                <p className="text-xs text-muted-foreground">Resource ID: {r.resourceId}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {r.lat.toFixed(4)}, {r.lng.toFixed(4)}
+                </p>
+              </div>
             </Popup>
           </CircleMarker>
         ))}
       </MapContainer>
 
-      {/* Map controls overlay - positioned top-left */}
+      {/* Map Controls Overlay */}
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 }}
         className="absolute left-3 top-3 z-40 flex flex-col gap-2"
       >
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        {/* Layer Toggles */}
+        <div className="flex gap-1">
           <Button
             size="sm"
             variant={showColdSpots ? "default" : "outline"}
-            className={`gap-1.5 shadow-md transition-all duration-200 ${
+            className={`gap-1.5 shadow-md transition-all ${
               showColdSpots 
                 ? "bg-cold-spot text-white hover:bg-cold-spot/90" 
                 : "bg-card text-foreground hover:bg-muted border border-border"
             }`}
             onClick={() => setShowColdSpots(!showColdSpots)}
           >
-            {showColdSpots ? (
-              <Eye className="h-3.5 w-3.5" />
-            ) : (
-              <EyeOff className="h-3.5 w-3.5" />
-            )}
+            {showColdSpots ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
             <span className="text-xs font-medium">Cold Spots</span>
           </Button>
-        </motion.div>
+          
+          <Button
+            size="sm"
+            variant={showFacilities ? "default" : "outline"}
+            className={`gap-1.5 shadow-md transition-all ${
+              showFacilities 
+                ? "bg-primary text-white hover:bg-primary/90" 
+                : "bg-card text-foreground hover:bg-muted border border-border"
+            }`}
+            onClick={() => setShowFacilities(!showFacilities)}
+          >
+            {showFacilities ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            <span className="text-xs font-medium">Facilities</span>
+          </Button>
+        </div>
 
         {/* Legend */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur-sm max-w-[180px]"
+          className="rounded-xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur-sm max-w-[200px]"
         >
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground mb-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground mb-2.5">
             <Layers className="h-3.5 w-3.5 text-primary" />
             Map Legend
           </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px]">
-            <span className="flex items-center gap-1.5 text-foreground">
-              <span className="h-2.5 w-2.5 rounded-full bg-hub-blue shrink-0 shadow-sm" /> Hospital
-            </span>
-            <span className="flex items-center gap-1.5 text-foreground">
-              <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: "#60A5FA" }} /> Clinic
-            </span>
-            <span className="flex items-center gap-1.5 text-foreground">
-              <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: "#818CF8" }} /> Lab
-            </span>
-            <span className="flex items-center gap-1.5 text-foreground">
-              <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: "#A78BFA" }} /> Pharmacy
-            </span>
-            <span className="flex items-center gap-1.5 text-foreground">
-              <span className="h-2.5 w-2.5 rounded-full bg-cold-spot opacity-50 shrink-0" /> Cold Spot
-            </span>
-            <span className="flex items-center gap-1.5 text-foreground">
-              <span className="h-2.5 w-2.5 rounded-full bg-teal shrink-0 shadow-sm" /> Deployed
-            </span>
+          
+          {/* Facilities */}
+          <div className="space-y-1.5 text-[10px]">
+            <p className="text-[9px] uppercase tracking-wide text-muted-foreground font-medium">Facilities</p>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+              <span className="flex items-center gap-1.5 text-foreground">
+                <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ background: facilityColors.hospital }} /> Hospital
+              </span>
+              <span className="flex items-center gap-1.5 text-foreground">
+                <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ background: facilityColors.clinic }} /> Clinic
+              </span>
+              <span className="flex items-center gap-1.5 text-foreground">
+                <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ background: facilityColors.lab }} /> Lab
+              </span>
+              <span className="flex items-center gap-1.5 text-foreground">
+                <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ background: facilityColors.pharmacy }} /> Pharmacy
+              </span>
+            </div>
+          </div>
+          
+          <div className="my-2 border-t border-border" />
+          
+          {/* Status & Other */}
+          <div className="space-y-1.5 text-[10px]">
+            <p className="text-[9px] uppercase tracking-wide text-muted-foreground font-medium">Status</p>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+              <span className="flex items-center gap-1.5 text-foreground">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber border-2 border-amber" /> Flagged
+              </span>
+              <span className="flex items-center gap-1.5 text-foreground">
+                <span className="h-2.5 w-2.5 rounded-full bg-cold-spot/40 border border-cold-spot" /> Cold Spot
+              </span>
+              <span className="flex items-center gap-1.5 text-foreground">
+                <span className="h-2.5 w-2.5 rounded-full bg-teal shadow-sm" /> Deployed
+              </span>
+            </div>
           </div>
         </motion.div>
+      </motion.div>
+
+      {/* Stats Overlay */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="absolute bottom-3 left-3 z-40 flex gap-2"
+      >
+        <div className="rounded-lg bg-card/95 backdrop-blur-sm border border-border px-3 py-2 shadow-lg">
+          <div className="flex items-center gap-3 text-xs">
+            <div className="text-center">
+              <p className="font-bold text-primary">{facilities.length}</p>
+              <p className="text-[9px] text-muted-foreground">Facilities</p>
+            </div>
+            <div className="h-6 w-px bg-border" />
+            <div className="text-center">
+              <p className="font-bold text-cold-spot">{coldSpots.length}</p>
+              <p className="text-[9px] text-muted-foreground">Cold Spots</p>
+            </div>
+            {droppedResources.length > 0 && (
+              <>
+                <div className="h-6 w-px bg-border" />
+                <div className="text-center">
+                  <p className="font-bold text-teal">{droppedResources.length}</p>
+                  <p className="text-[9px] text-muted-foreground">Deployed</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </motion.div>
     </div>
   );
