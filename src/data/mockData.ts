@@ -17,6 +17,8 @@ export interface Facility {
 }
 
 export interface ColdSpot {
+  id: string;
+  name: string;
   lat: number;
   lng: number;
   intensity: number;
@@ -51,8 +53,10 @@ export interface Citation {
 
 export interface DraggableResource {
   id: string;
-  type: "doctor" | "nurse" | "surgeon" | "ambulance";
-  label: string;
+  type: "doctor" | "nurse" | "surgeon" | "ambulance" | "equipment" | "supply";
+  name: string;
+  specialty: string;
+  status: "available" | "deployed";
   icon: string;
 }
 
@@ -162,18 +166,19 @@ export const facilities: Facility[] = [
 ];
 
 export const coldSpots: ColdSpot[] = [
-  { lat: -2.35, lng: 29.4, intensity: 0.9, population: 180000, nearestFacilityKm: 78 },
-  { lat: -1.75, lng: 30.3, intensity: 0.75, population: 120000, nearestFacilityKm: 52 },
-  { lat: -2.5, lng: 29.9, intensity: 0.85, population: 95000, nearestFacilityKm: 65 },
-  { lat: -1.3, lng: 30.1, intensity: 0.6, population: 70000, nearestFacilityKm: 41 },
-  { lat: -2.0, lng: 29.2, intensity: 0.7, population: 85000, nearestFacilityKm: 55 },
+  { id: "cs1", name: "Western Province Rural", lat: -2.35, lng: 29.4, intensity: 0.9, population: 150000, nearestFacilityKm: 65 },
+  { id: "cs2", name: "Eastern Border Region", lat: -1.75, lng: 30.3, intensity: 0.75, population: 85000, nearestFacilityKm: 45 },
+  { id: "cs3", name: "Southern Highlands", lat: -2.5, lng: 29.9, intensity: 0.85, population: 95000, nearestFacilityKm: 58 },
+  { id: "cs4", name: "Northern Valley", lat: -1.3, lng: 30.1, intensity: 0.6, population: 70000, nearestFacilityKm: 41 },
+  { id: "cs5", name: "Central Rural Zone", lat: -2.0, lng: 29.2, intensity: 0.7, population: 62000, nearestFacilityKm: 55 },
 ];
 
 export const draggableResources: DraggableResource[] = [
-  { id: "r1", type: "doctor", label: "General Practitioner", icon: "👨‍⚕️" },
-  { id: "r2", type: "surgeon", label: "Surgeon", icon: "🩺" },
-  { id: "r3", type: "nurse", label: "Nurse", icon: "👩‍⚕️" },
-  { id: "r4", type: "ambulance", label: "Ambulance Unit", icon: "🚑" },
+  { id: "r1", type: "doctor", name: "Dr. Marie Uwimana", specialty: "Pediatrics", status: "available", icon: "user" },
+  { id: "r2", type: "nurse", name: "Nurse Alice Mukamana", specialty: "Emergency Care", status: "available", icon: "user" },
+  { id: "r3", type: "equipment", name: "Mobile Surgical Unit A", specialty: "Equipment", status: "available", icon: "stethoscope" },
+  { id: "r4", type: "equipment", name: "Portable X-Ray Machine", specialty: "Equipment", status: "deployed", icon: "stethoscope" },
+  { id: "r5", type: "supply", name: "Emergency Medical Kit (50 units)", specialty: "Supply", status: "available", icon: "package" },
 ];
 
 export const sampleChainOfThought: ChainStep[] = [
