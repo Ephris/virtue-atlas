@@ -52,6 +52,34 @@ interface IntelligenceMapProps {
 }
 
 // ============================================================================
+// MAP RESIZER - Ensures map displays correctly when container changes
+// ============================================================================
+function MapResizer() {
+  const map = useMap();
+  
+  useEffect(() => {
+    // Force map to recalculate its size after mounting
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+    
+    // Also handle window resize
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+  
+  return null;
+}
+
+// ============================================================================
 // DROPPABLE MAP LAYER - Resource Planning Integration
 // ============================================================================
 function DroppableMapLayer({
@@ -158,18 +186,21 @@ const IntelligenceMap = ({ onFacilityClick, selectedFacility }: IntelligenceMapP
   };
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full" style={{ minHeight: '400px' }}>
       <MapContainer
         center={[-1.94, 29.87]}
         zoom={8}
-        className="h-full w-full rounded-none"
+        className="h-full w-full"
+        style={{ height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         zoomControl={false}
+        scrollWheelZoom={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
 
+        <MapResizer />
         <DroppableMapLayer onDrop={handleDrop} />
         <MapControls />
 

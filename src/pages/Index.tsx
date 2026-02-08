@@ -59,15 +59,14 @@ const Index = () => {
             </div>
 
             {/* Map Tab */}
-            <TabsContent value="map" className="flex-1 m-0 relative" forceMount>
-              <motion.div 
-                className="h-full w-full"
-                initial={false}
-                animate={{ 
+            <TabsContent value="map" className="flex-1 m-0 relative h-full" forceMount>
+              <div 
+                className="absolute inset-0"
+                style={{ 
                   opacity: activeTab === "map" ? 1 : 0,
-                  display: activeTab === "map" ? "block" : "none" 
+                  visibility: activeTab === "map" ? "visible" : "hidden",
+                  pointerEvents: activeTab === "map" ? "auto" : "none"
                 }}
-                transition={{ duration: 0.2 }}
               >
                 <IntelligenceMap onFacilityClick={setSelectedFacility} selectedFacility={selectedFacility} />
                 
@@ -77,7 +76,7 @@ const Index = () => {
                     <VerificationSidebar facility={selectedFacility} onClose={() => setSelectedFacility(null)} />
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </div>
             </TabsContent>
 
             {/* Chat Tab (mobile only) */}
