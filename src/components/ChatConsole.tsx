@@ -24,7 +24,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Loader2, Clock, Zap, Sparkles } from "lucide-react";
+import { Bot, Loader2, Clock, Zap, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChatMessage,
@@ -60,9 +60,10 @@ const ChatConsole = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [responseTime, setResponseTime] = useState<number | null>(null);
+  const [showQuickQueries, setShowQuickQueries] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   
-  // Hide Quick Queries when conversation is active (user has sent messages)
+  // Check if conversation is active (user has sent messages)
   const hasConversation = messages.some(msg => msg.role === "user");
 
   useEffect(() => {
@@ -207,13 +208,42 @@ const ChatConsole = () => {
         </div>
       </div>
 
-      {/* Quick Queries - only show when no active conversation */}
-      {!hasConversation && (
-        <QuickQueryBar
-          queries={quickQueries}
-          onQueryClick={handleSend}
-          disabled={isLoading}
-        />
+      {/* Quick Queries - toggleable */}
+      <AnimatePresence>
+        {(showQuickQueries || !hasConversation) && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <QuickQueryBar
+              queries={quickQueries}
+              onQueryClick={handleSend}
+              disabled={isLoading}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toggle button - only show when conversation is active */}
+      {hasConversation && (
+        <button
+          onClick={() => setShowQuickQueries(!showQuickQueries)}
+          className="shrink-0 flex items-center justify-center gap-1 w-full py-1 text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/50 border-b border-border transition-colors"
+        >
+          {showQuickQueries ? (
+            <>
+              <ChevronUp className="h-3 w-3" />
+              Hide suggestions
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-3 w-3" />
+              Show suggestions
+            </>
+          )}
+        </button>
       )}
 
       {/* Messages - scrollable, takes remaining space */}
