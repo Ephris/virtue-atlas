@@ -68,7 +68,7 @@ const StatsBar = () => {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-4 gap-2 px-2 py-2 sm:gap-3 sm:px-4 sm:py-3 border-b border-border bg-gradient-to-r from-muted/30 via-background to-muted/30"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-2 px-2 py-2 sm:gap-3 sm:px-4 sm:py-3 border-b border-border bg-gradient-to-r from-muted/30 via-background to-muted/30"
       >
         {stats.map((stat, index) => (
           <Tooltip key={stat.label}>
@@ -79,7 +79,7 @@ const StatsBar = () => {
                 className={`
                   flex items-center gap-2 sm:gap-3 rounded-xl border ${stat.borderColor} 
                   bg-card px-2.5 py-2 sm:px-4 sm:py-3 cursor-default
-                  hover:shadow-md transition-shadow duration-200
+                  hover:shadow-md transition-all duration-200
                 `}
               >
                 <motion.div 
@@ -92,12 +92,12 @@ const StatsBar = () => {
                 </motion.div>
                 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline gap-1.5">
+                  <div className="flex items-baseline gap-1">
                     <motion.p 
                       key={stat.value}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-lg sm:text-xl font-bold text-foreground leading-tight"
+                      className="text-base sm:text-xl font-bold text-foreground leading-tight"
                     >
                       {stat.value}
                     </motion.p>
@@ -108,13 +108,13 @@ const StatsBar = () => {
                       {stat.trend}
                     </span>
                   </div>
-                  <p className="text-[9px] sm:text-[11px] text-muted-foreground truncate font-medium">
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate font-medium">
                     {stat.label}
                   </p>
                 </div>
               </motion.div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
+            <TooltipContent side="bottom" className="text-xs bg-popover border border-border z-50">
               <p>{stat.description}</p>
               <p className="text-muted-foreground mt-1">
                 Last 30 days: <span className={stat.trend.startsWith('-') && (stat.label === 'Cold Spots' || stat.label === 'Population at Risk') ? 'text-teal' : stat.trend.startsWith('+') ? 'text-teal' : 'text-cold-spot'}>{stat.trend}</span>
