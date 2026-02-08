@@ -25,7 +25,7 @@
 
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, useMap } from "react-leaflet";
-import { Layers, Eye, EyeOff, ZoomIn, ZoomOut, LocateFixed, MapPin, AlertTriangle } from "lucide-react";
+import { Layers, Eye, EyeOff, ZoomIn, ZoomOut, LocateFixed, MapPin, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { facilities, coldSpots, type Facility } from "@/data/mockData";
 import { motion, AnimatePresence } from "framer-motion";
@@ -171,6 +171,7 @@ function MapControls() {
 const IntelligenceMap = ({ onFacilityClick, selectedFacility }: IntelligenceMapProps) => {
   const [showColdSpots, setShowColdSpots] = useState(true);
   const [showFacilities, setShowFacilities] = useState(true);
+  const [showLegend, setShowLegend] = useState(false);
   const [droppedResources, setDroppedResources] = useState<
     { lat: number; lng: number; resourceId: string }[]
   >([]);
@@ -354,93 +355,114 @@ const IntelligenceMap = ({ onFacilityClick, selectedFacility }: IntelligenceMapP
         ))}
       </MapContainer>
 
-      {/* Map Controls Overlay */}
+      {/* Map Controls Overlay - Compact */}
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 }}
-        className="absolute left-3 top-3 z-40 flex flex-col gap-2"
+        className="absolute left-2 top-2 z-40 flex flex-col gap-1.5"
       >
-        {/* Layer Toggles */}
+        {/* Layer Toggles - Compact icon buttons */}
         <div className="flex gap-1">
           <Button
-            size="sm"
+            size="icon"
             variant={showColdSpots ? "default" : "outline"}
-            className={`gap-1.5 shadow-md transition-all ${
+            className={`h-8 w-8 shadow-md transition-all ${
               showColdSpots 
                 ? "bg-cold-spot text-white hover:bg-cold-spot/90" 
                 : "bg-card text-foreground hover:bg-muted border border-border"
             }`}
             onClick={() => setShowColdSpots(!showColdSpots)}
+            title={showColdSpots ? "Hide Cold Spots" : "Show Cold Spots"}
           >
-            {showColdSpots ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-            <span className="text-xs font-medium">Cold Spots</span>
+            <AlertTriangle className="h-4 w-4" />
           </Button>
           
           <Button
-            size="sm"
+            size="icon"
             variant={showFacilities ? "default" : "outline"}
-            className={`gap-1.5 shadow-md transition-all ${
+            className={`h-8 w-8 shadow-md transition-all ${
               showFacilities 
                 ? "bg-primary text-white hover:bg-primary/90" 
                 : "bg-card text-foreground hover:bg-muted border border-border"
             }`}
             onClick={() => setShowFacilities(!showFacilities)}
+            title={showFacilities ? "Hide Facilities" : "Show Facilities"}
           >
-            {showFacilities ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-            <span className="text-xs font-medium">Facilities</span>
+            <MapPin className="h-4 w-4" />
+          </Button>
+
+          {/* Legend Toggle Button */}
+          <Button
+            size="icon"
+            variant="outline"
+            className={`h-8 w-8 shadow-md bg-card border-border hover:bg-muted ${showLegend ? 'ring-2 ring-primary' : ''}`}
+            onClick={() => setShowLegend(!showLegend)}
+            title={showLegend ? "Hide Legend" : "Show Legend"}
+          >
+            <Layers className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* Legend */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="rounded-xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur-sm max-w-[200px]"
-        >
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground mb-2.5">
-            <Layers className="h-3.5 w-3.5 text-primary" />
-            Map Legend
-          </div>
-          
-          {/* Facilities */}
-          <div className="space-y-1.5 text-[10px]">
-            <p className="text-[9px] uppercase tracking-wide text-muted-foreground font-medium">Facilities</p>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-              <span className="flex items-center gap-1.5 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ background: facilityColors.hospital }} /> Hospital
-              </span>
-              <span className="flex items-center gap-1.5 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ background: facilityColors.clinic }} /> Clinic
-              </span>
-              <span className="flex items-center gap-1.5 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ background: facilityColors.lab }} /> Lab
-              </span>
-              <span className="flex items-center gap-1.5 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full shadow-sm" style={{ background: facilityColors.pharmacy }} /> Pharmacy
-              </span>
-            </div>
-          </div>
-          
-          <div className="my-2 border-t border-border" />
-          
-          {/* Status & Other */}
-          <div className="space-y-1.5 text-[10px]">
-            <p className="text-[9px] uppercase tracking-wide text-muted-foreground font-medium">Status</p>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-              <span className="flex items-center gap-1.5 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber border-2 border-amber" /> Flagged
-              </span>
-              <span className="flex items-center gap-1.5 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full bg-cold-spot/40 border border-cold-spot" /> Cold Spot
-              </span>
-              <span className="flex items-center gap-1.5 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full bg-teal shadow-sm" /> Deployed
-              </span>
-            </div>
-          </div>
-        </motion.div>
+        {/* Collapsible Legend */}
+        <AnimatePresence>
+          {showLegend && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="rounded-lg border border-border bg-card/95 p-2 shadow-lg backdrop-blur-sm max-w-[160px] overflow-hidden"
+            >
+              <div className="flex items-center justify-between text-xs font-semibold text-foreground mb-1.5">
+                <span className="flex items-center gap-1">
+                  <Layers className="h-3 w-3 text-primary" />
+                  Legend
+                </span>
+                <button onClick={() => setShowLegend(false)} className="text-muted-foreground hover:text-foreground">
+                  <ChevronUp className="h-3 w-3" />
+                </button>
+              </div>
+              
+              {/* Facilities - Compact */}
+              <div className="space-y-0.5 text-[9px]">
+                <p className="text-[8px] uppercase tracking-wide text-muted-foreground font-medium">Facilities</p>
+                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                  <span className="flex items-center gap-1 text-foreground">
+                    <span className="h-2 w-2 rounded-full" style={{ background: facilityColors.hospital }} /> Hospital
+                  </span>
+                  <span className="flex items-center gap-1 text-foreground">
+                    <span className="h-2 w-2 rounded-full" style={{ background: facilityColors.clinic }} /> Clinic
+                  </span>
+                  <span className="flex items-center gap-1 text-foreground">
+                    <span className="h-2 w-2 rounded-full" style={{ background: facilityColors.lab }} /> Lab
+                  </span>
+                  <span className="flex items-center gap-1 text-foreground">
+                    <span className="h-2 w-2 rounded-full" style={{ background: facilityColors.pharmacy }} /> Pharmacy
+                  </span>
+                </div>
+              </div>
+              
+              <div className="my-1.5 border-t border-border" />
+              
+              {/* Status - Compact */}
+              <div className="space-y-0.5 text-[9px]">
+                <p className="text-[8px] uppercase tracking-wide text-muted-foreground font-medium">Status</p>
+                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                  <span className="flex items-center gap-1 text-foreground">
+                    <span className="h-2 w-2 rounded-full bg-amber" /> Flagged
+                  </span>
+                  <span className="flex items-center gap-1 text-foreground">
+                    <span className="h-2 w-2 rounded-full bg-cold-spot/50 border border-cold-spot" /> Cold Spot
+                  </span>
+                  <span className="flex items-center gap-1 text-foreground">
+                    <span className="h-2 w-2 rounded-full bg-teal" /> Deployed
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Stats Overlay */}
