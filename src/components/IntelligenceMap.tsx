@@ -163,7 +163,8 @@ const IntelligenceMap = ({ onFacilityClick, selectedFacility }: IntelligenceMapP
       </MapContainer>
 
       {/* Map controls overlay - positioned top-left, stacked vertically */}
-      <div className="absolute left-3 top-3 z-[1000] flex flex-col gap-2">
+      {/* z-[40] keeps it above map (z-1) but below modals/drawers (z-50) */}
+      <div className="absolute left-3 top-3 z-40 flex flex-col gap-2">
         <Button
           size="sm"
           variant={showColdSpots ? "default" : "outline"}
