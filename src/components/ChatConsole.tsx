@@ -169,9 +169,9 @@ const ChatConsole = () => {
   };
 
   return (
-    <div className="flex h-full flex-col border-l border-border bg-card">
-      {/* Header */}
-      <div className="border-b border-border px-4 py-3 bg-gradient-to-r from-card to-muted/30">
+    <div className="flex h-full flex-col overflow-hidden bg-card">
+      {/* Header - fixed height */}
+      <div className="shrink-0 border-b border-border px-4 py-3 bg-gradient-to-r from-card to-muted/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-sm">
@@ -204,15 +204,17 @@ const ChatConsole = () => {
         </div>
       </div>
 
-      {/* Quick Queries */}
-      <QuickQueryBar
-        queries={quickQueries}
-        onQueryClick={handleSend}
-        disabled={isLoading}
-      />
+      {/* Quick Queries - fixed height */}
+      <div className="shrink-0">
+        <QuickQueryBar
+          queries={quickQueries}
+          onQueryClick={handleSend}
+          disabled={isLoading}
+        />
+      </div>
 
-      {/* Messages */}
-      <div className="custom-scrollbar flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages - scrollable */}
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 space-y-4">
         <AnimatePresence mode="popLayout">
           {messages.map((msg) => (
             <ChatMessage key={msg.id} message={msg} />
@@ -245,12 +247,14 @@ const ChatConsole = () => {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <ChatInput 
-        onSend={handleSend} 
-        isLoading={isLoading}
-        placeholder="Ask about facilities, cold spots, capacity..."
-      />
+      {/* Input - fixed height */}
+      <div className="shrink-0">
+        <ChatInput 
+          onSend={handleSend} 
+          isLoading={isLoading}
+          placeholder="Ask about facilities, cold spots, capacity..."
+        />
+      </div>
     </div>
   );
 };

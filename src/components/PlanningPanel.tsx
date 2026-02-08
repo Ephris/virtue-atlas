@@ -150,10 +150,10 @@ const PlanningPanel = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col h-full bg-background"
+      className="flex flex-col h-full overflow-hidden bg-background"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+      {/* Header - fixed height */}
+      <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-border bg-card">
         <div className="flex items-center gap-3">
           <motion.div 
             whileHover={{ scale: 1.05, rotate: 5 }}
@@ -193,14 +193,14 @@ const PlanningPanel = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* Content - fills remaining space */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Left - Resource List */}
-        <div className="w-1/2 border-r border-border">
-          <div className="px-3 py-2 border-b border-border bg-muted/30">
+        <div className="w-1/2 flex flex-col border-r border-border overflow-hidden">
+          <div className="shrink-0 px-3 py-2 border-b border-border bg-muted/30">
             <p className="text-xs font-medium text-muted-foreground">Available Resources</p>
           </div>
-          <ScrollArea className="h-[calc(100%-32px)]">
+          <ScrollArea className="flex-1">
             <div className="p-3 space-y-2">
               <AnimatePresence>
                 {draggableResources.map((resource, index) => {
@@ -254,11 +254,11 @@ const PlanningPanel = () => {
         </div>
 
         {/* Right - Cold Spot Drop Zones */}
-        <div className="w-1/2">
-          <div className="px-3 py-2 border-b border-border bg-muted/30">
+        <div className="w-1/2 flex flex-col overflow-hidden">
+          <div className="shrink-0 px-3 py-2 border-b border-border bg-muted/30">
             <p className="text-xs font-medium text-muted-foreground">Cold Spot Targets</p>
           </div>
-          <ScrollArea className="h-[calc(100%-32px)]">
+          <ScrollArea className="flex-1">
             <div className="p-3 space-y-3">
               {coldSpots.slice(0, 3).map((coldSpot, index) => {
                 const deployment = deployments.find(d => d.coldSpotId === coldSpot.id);
