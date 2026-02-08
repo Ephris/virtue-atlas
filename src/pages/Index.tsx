@@ -17,15 +17,23 @@ const Index = () => {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <DashboardHeader />
-      <StatsBar />
+      {/* Header - fixed height */}
+      <div className="shrink-0">
+        <DashboardHeader />
+      </div>
+      
+      {/* Stats Bar - fixed height */}
+      <div className="shrink-0">
+        <StatsBar />
+      </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      {/* Main content area - takes remaining space */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Main content area with tabs */}
-        <div className="relative flex flex-1 flex-col">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col overflow-hidden">
-            {/* Tab Navigation */}
-            <div className="flex items-center border-b border-border bg-card px-2 sm:px-4">
+        <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0 overflow-hidden">
+            {/* Tab Navigation - fixed height */}
+            <div className="shrink-0 flex items-center border-b border-border bg-card px-2 sm:px-4">
               <TabsList className="h-11 bg-transparent p-0 gap-0.5 sm:gap-1">
                 <TabsTrigger 
                   value="map" 
@@ -58,48 +66,49 @@ const Index = () => {
               </TabsList>
             </div>
 
-            {/* Map Tab */}
-            <TabsContent value="map" className="flex-1 m-0 relative h-full" forceMount>
-              <div 
-                className="absolute inset-0"
-                style={{ 
-                  opacity: activeTab === "map" ? 1 : 0,
-                  visibility: activeTab === "map" ? "visible" : "hidden",
-                  pointerEvents: activeTab === "map" ? "auto" : "none"
-                }}
+            {/* Tab Content - fills remaining space */}
+            <div className="flex-1 min-h-0 overflow-hidden relative">
+              {/* Map Tab */}
+              <TabsContent 
+                value="map" 
+                className="absolute inset-0 m-0 data-[state=inactive]:hidden"
+                forceMount
               >
-                <IntelligenceMap onFacilityClick={setSelectedFacility} selectedFacility={selectedFacility} />
-                
-                {/* Verification sidebar overlay on map */}
-                <AnimatePresence>
-                  {selectedFacility && (
-                    <VerificationSidebar facility={selectedFacility} onClose={() => setSelectedFacility(null)} />
-                  )}
-                </AnimatePresence>
-              </div>
-            </TabsContent>
+                <div className="h-full w-full relative">
+                  <IntelligenceMap onFacilityClick={setSelectedFacility} selectedFacility={selectedFacility} />
+                  
+                  {/* Verification sidebar overlay on map */}
+                  <AnimatePresence>
+                    {selectedFacility && (
+                      <VerificationSidebar facility={selectedFacility} onClose={() => setSelectedFacility(null)} />
+                    )}
+                  </AnimatePresence>
+                </div>
+              </TabsContent>
 
-            {/* Chat Tab (mobile only) */}
-            <TabsContent value="chat" className="flex-1 m-0 lg:hidden">
-              <ChatConsole />
-            </TabsContent>
+              {/* Chat Tab (mobile only) */}
+              <TabsContent 
+                value="chat" 
+                className="absolute inset-0 m-0 lg:hidden overflow-hidden data-[state=inactive]:hidden"
+              >
+                <ChatConsole />
+              </TabsContent>
 
-            {/* Resource Planner Tab */}
-            <TabsContent value="planner" className="flex-1 m-0">
-              <PlanningPanel />
-            </TabsContent>
+              {/* Resource Planner Tab */}
+              <TabsContent 
+                value="planner" 
+                className="absolute inset-0 m-0 overflow-hidden data-[state=inactive]:hidden"
+              >
+                <PlanningPanel />
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
 
         {/* Chat console - desktop sidebar */}
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="hidden w-96 border-l border-border lg:block"
-        >
+        <div className="hidden w-96 shrink-0 border-l border-border lg:flex lg:flex-col overflow-hidden">
           <ChatConsole />
-        </motion.div>
+        </div>
       </div>
     </div>
   );
