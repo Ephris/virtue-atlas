@@ -33,28 +33,28 @@ const Index = () => {
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0 overflow-hidden">
             {/* Tab Navigation - fixed height */}
-            <div className="shrink-0 flex items-center border-b border-border bg-card px-2 sm:px-4">
-              <TabsList className="h-11 bg-transparent p-0 gap-0.5 sm:gap-1">
+            <div className="shrink-0 flex items-center border-b border-border bg-card px-1.5 sm:px-4">
+              <TabsList className="h-10 bg-transparent p-0 gap-0 sm:h-11 sm:gap-1">
                 <TabsTrigger 
                   value="map" 
-                  className="gap-1.5 px-3 sm:px-4 py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary transition-all duration-200"
+                  className="gap-1 px-2 py-1.5 text-xs data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary transition-all duration-200 sm:gap-1.5 sm:px-4 sm:py-2 sm:text-sm"
                 >
-                  <Map className="h-4 w-4" />
-                  <span className="hidden sm:inline font-medium">Intelligence Map</span>
+                  <Map className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="font-medium">Map</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="chat" 
-                  className="gap-1.5 px-3 sm:px-4 py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary transition-all duration-200 lg:hidden"
+                  className="gap-1 px-2 py-1.5 text-xs data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary transition-all duration-200 lg:hidden sm:gap-1.5 sm:px-4 sm:py-2 sm:text-sm"
                 >
-                  <MessageSquare className="h-4 w-4" />
-                  <span className="hidden sm:inline font-medium">AI Console</span>
+                  <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="font-medium">AI</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="planner" 
-                  className="gap-1.5 px-3 sm:px-4 py-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary transition-all duration-200 relative"
+                  className="gap-1 px-2 py-1.5 text-xs data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-none border-b-2 border-transparent data-[state=active]:border-primary transition-all duration-200 relative sm:gap-1.5 sm:px-4 sm:py-2 sm:text-sm"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  <span className="hidden sm:inline font-medium">Resource Planner</span>
+                  <ClipboardList className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="font-medium">Planner</span>
                   <Badge 
                     variant="secondary" 
                     className="hidden sm:flex h-4 px-1.5 text-[9px] bg-amber/15 text-amber border-0 ml-1"

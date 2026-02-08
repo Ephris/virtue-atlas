@@ -68,7 +68,7 @@ const StatsBar = () => {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-2 sm:grid-cols-4 gap-2 px-2 py-2 sm:gap-3 sm:px-4 sm:py-3 border-b border-border bg-gradient-to-r from-muted/30 via-background to-muted/30"
+        className="grid grid-cols-2 gap-1.5 p-2 sm:grid-cols-4 sm:gap-3 sm:px-4 sm:py-3 border-b border-border bg-gradient-to-r from-muted/30 via-background to-muted/30"
       >
         {stats.map((stat, index) => (
           <Tooltip key={stat.label}>
@@ -77,8 +77,8 @@ const StatsBar = () => {
                 variants={itemVariants}
                 whileHover={{ scale: 1.02, y: -2 }}
                 className={`
-                  flex items-center gap-2 sm:gap-3 rounded-xl border ${stat.borderColor} 
-                  bg-card px-2.5 py-2 sm:px-4 sm:py-3 cursor-default
+                  flex items-center gap-1.5 rounded-lg border ${stat.borderColor} 
+                  bg-card px-2 py-1.5 sm:gap-3 sm:rounded-xl sm:px-4 sm:py-3 cursor-default
                   hover:shadow-md transition-all duration-200
                 `}
               >
@@ -86,18 +86,18 @@ const StatsBar = () => {
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: index * 0.1 + 0.2, type: "spring", stiffness: 200 }}
-                  className={`flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg ${stat.bg}`}
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md sm:h-10 sm:w-10 sm:rounded-lg ${stat.bg}`}
                 >
-                  <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`} />
+                  <stat.icon className={`h-3.5 w-3.5 sm:h-5 sm:w-5 ${stat.color}`} />
                 </motion.div>
                 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline gap-1">
+                <div className="min-w-0 flex-1 overflow-hidden">
+                  <div className="flex items-baseline gap-0.5 sm:gap-1">
                     <motion.p 
                       key={stat.value}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-base sm:text-xl font-bold text-foreground leading-tight"
+                      className="text-sm font-bold text-foreground leading-tight sm:text-xl truncate"
                     >
                       {stat.value}
                     </motion.p>
@@ -108,7 +108,7 @@ const StatsBar = () => {
                       {stat.trend}
                     </span>
                   </div>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate font-medium">
+                  <p className="text-[9px] text-muted-foreground truncate font-medium sm:text-[11px]">
                     {stat.label}
                   </p>
                 </div>
