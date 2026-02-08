@@ -1,9 +1,13 @@
-import { Shield, Bell, RefreshCw } from "lucide-react";
+import { Shield, Bell, RefreshCw, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { dashboardStats } from "@/data/mockData";
 
-const DashboardHeader = () => {
+interface DashboardHeaderProps {
+  onUploadClick?: () => void;
+}
+
+const DashboardHeader = ({ onUploadClick }: DashboardHeaderProps) => {
   return (
     <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
       <div className="flex items-center gap-3">
@@ -37,6 +41,17 @@ const DashboardHeader = () => {
             {dashboardStats.coldSpots} Cold Spots
           </span>
         </div>
+
+        {/* Upload Button */}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="gap-1.5 text-xs"
+          onClick={onUploadClick}
+        >
+          <Upload className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Upload Data</span>
+        </Button>
 
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-4 w-4" />
