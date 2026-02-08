@@ -1,10 +1,11 @@
-import { GripVertical, User, Stethoscope, Package, X, Check, MapPin, AlertTriangle } from "lucide-react";
+import { GripVertical, User, Stethoscope, Package, X, Check, MapPin, AlertTriangle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { draggableResources, coldSpots, DraggableResource, ColdSpot } from "@/data/mockData";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Deployment {
   coldSpotId: string;
@@ -28,13 +29,13 @@ const getResourceIcon = (type: string) => {
 const getIconBgColor = (type: string) => {
   switch (type) {
     case "doctor":
-      return "bg-blue-100 text-blue-600";
+      return "bg-hub-blue/15 text-hub-blue";
     case "nurse":
-      return "bg-emerald-100 text-emerald-600";
+      return "bg-teal/15 text-teal";
     case "equipment":
-      return "bg-violet-100 text-violet-600";
+      return "bg-primary/10 text-primary";
     case "supply":
-      return "bg-amber-100 text-amber-600";
+      return "bg-amber/15 text-amber";
     default:
       return "bg-muted text-muted-foreground";
   }
@@ -63,7 +64,6 @@ const PlanningPanel = () => {
       setDeployments(prev => {
         const existing = prev.find(d => d.coldSpotId === coldSpot.id);
         if (existing) {
-          // Check if already added
           if (existing.resources.some(r => r.id === resource.id)) {
             return prev;
           }
@@ -74,6 +74,9 @@ const PlanningPanel = () => {
           );
         }
         return [...prev, { coldSpotId: coldSpot.id, resources: [resource] }];
+      });
+      toast.success(`${resource.name} deployed`, {
+        description: `Assigned to ${coldSpot.name}`,
       });
     }
     setDraggedResource(null);
@@ -92,6 +95,7 @@ const PlanningPanel = () => {
           : d
       ).filter(d => d.resources.length > 0)
     );
+    toast.info("Resource removed from deployment");
   };
 
   const getTotalDeployedCount = () => {
@@ -109,8 +113,9 @@ const PlanningPanel = () => {
       });
       return;
     }
-    toast.success("Deployment plan saved", {
+    toast.success("Deployment plan saved!", {
       description: `${getTotalDeployedCount()} resource(s) allocated to ${deployments.length} region(s).`,
+      icon: <Sparkles className="h-4 w-4" />,
     });
   };
 
@@ -120,36 +125,49 @@ const PlanningPanel = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col h-full bg-background"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded bg-primary/10">
-            <Package className="h-4 w-4 text-primary" />
-          </div>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+        <div className="flex items-center gap-3">
+          <motion.div 
+            whileHover={{ scale: 1.05, rotate: 5 }}
+            className="p-2 rounded-lg bg-primary/10"
+          >
+            <Package className="h-5 w-5 text-primary" />
+          </motion.div>
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Resource Planner</h2>
+            <h2 className="text-sm font-bold text-foreground">Resource Planner</h2>
             <p className="text-xs text-muted-foreground">Drag resources to cold spots to plan deployments</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleClearAll}
-            className="h-8 gap-1.5"
-          >
-            <X className="h-3.5 w-3.5" />
-            Clear
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={handleSavePlan}
-            className="h-8 gap-1.5"
-          >
-            <Check className="h-3.5 w-3.5" />
-            Save ({getTotalDeployedCount()})
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleClearAll}
+              className="h-8 gap-1.5 text-xs"
+              disabled={getTotalDeployedCount() === 0}
+            >
+              <X className="h-3.5 w-3.5" />
+              Clear
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              size="sm" 
+              onClick={handleSavePlan}
+              className="h-8 gap-1.5 text-xs"
+              disabled={getTotalDeployedCount() === 0}
+            >
+              <Check className="h-3.5 w-3.5" />
+              Save ({getTotalDeployedCount()})
+            </Button>
+          </motion.div>
         </div>
       </div>
 
@@ -157,118 +175,172 @@ const PlanningPanel = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Left - Resource List */}
         <div className="w-1/2 border-r border-border">
-          <ScrollArea className="h-full">
+          <div className="px-3 py-2 border-b border-border bg-muted/30">
+            <p className="text-xs font-medium text-muted-foreground">Available Resources</p>
+          </div>
+          <ScrollArea className="h-[calc(100%-32px)]">
             <div className="p-3 space-y-2">
-              {draggableResources.map((resource) => {
-                const isDeployed = resource.status === "deployed" || isResourceDeployed(resource.id);
-                return (
-                  <div
-                    key={resource.id}
-                    draggable={!isDeployed}
-                    onDragStart={(e) => handleDragStart(e, resource)}
-                    onDragEnd={handleDragEnd}
-                    className={`
-                      flex items-center gap-3 p-3 rounded-lg border border-border bg-card
-                      ${isDeployed 
-                        ? "opacity-60 cursor-not-allowed" 
-                        : "cursor-grab hover:border-primary/50 hover:shadow-sm active:cursor-grabbing"
-                      }
-                      transition-all duration-200
-                    `}
-                  >
-                    <GripVertical className={`h-4 w-4 ${isDeployed ? "text-muted" : "text-muted-foreground"}`} />
-                    <div className={`p-2 rounded-lg ${getIconBgColor(resource.type)}`}>
-                      {getResourceIcon(resource.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{resource.name}</p>
-                      <p className="text-xs text-muted-foreground">{resource.specialty}</p>
-                    </div>
-                    <Badge 
-                      variant={isDeployed ? "secondary" : "outline"}
-                      className={
-                        isDeployed 
-                          ? "bg-muted text-muted-foreground" 
-                          : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
-                      }
+              <AnimatePresence>
+                {draggableResources.map((resource, index) => {
+                  const isDeployed = resource.status === "deployed" || isResourceDeployed(resource.id);
+                  return (
+                    <motion.div
+                      key={resource.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      draggable={!isDeployed}
+                      onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, resource)}
+                      onDragEnd={handleDragEnd}
+                      whileHover={!isDeployed ? { scale: 1.01, x: 4 } : {}}
+                      className={`
+                        flex items-center gap-3 p-3 rounded-xl border bg-card
+                        ${isDeployed 
+                          ? "opacity-50 cursor-not-allowed border-border" 
+                          : "cursor-grab hover:border-primary/40 hover:shadow-md active:cursor-grabbing border-border"
+                        }
+                        transition-all duration-200
+                      `}
                     >
-                      {isDeployed ? "Deployed" : "Available"}
-                    </Badge>
-                  </div>
-                );
-              })}
+                      <GripVertical className={`h-4 w-4 ${isDeployed ? "text-muted" : "text-muted-foreground"}`} />
+                      <motion.div 
+                        whileHover={!isDeployed ? { rotate: [0, -10, 10, 0] } : {}}
+                        className={`p-2.5 rounded-lg ${getIconBgColor(resource.type)}`}
+                      >
+                        {getResourceIcon(resource.type)}
+                      </motion.div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{resource.name}</p>
+                        <p className="text-xs text-muted-foreground">{resource.specialty}</p>
+                      </div>
+                      <Badge 
+                        variant={isDeployed ? "secondary" : "outline"}
+                        className={
+                          isDeployed 
+                            ? "bg-muted text-muted-foreground text-[10px]" 
+                            : "border-teal/30 bg-teal/10 text-teal text-[10px] font-medium"
+                        }
+                      >
+                        {isDeployed ? "Deployed" : "Available"}
+                      </Badge>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
           </ScrollArea>
         </div>
 
         {/* Right - Cold Spot Drop Zones */}
         <div className="w-1/2">
-          <ScrollArea className="h-full">
+          <div className="px-3 py-2 border-b border-border bg-muted/30">
+            <p className="text-xs font-medium text-muted-foreground">Cold Spot Targets</p>
+          </div>
+          <ScrollArea className="h-[calc(100%-32px)]">
             <div className="p-3 space-y-3">
-              {coldSpots.slice(0, 3).map((coldSpot) => {
+              {coldSpots.slice(0, 3).map((coldSpot, index) => {
                 const deployment = deployments.find(d => d.coldSpotId === coldSpot.id);
                 const hasResources = deployment && deployment.resources.length > 0;
                 
                 return (
-                  <div
+                  <motion.div
                     key={coldSpot.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
                     onDrop={(e) => handleDrop(e, coldSpot)}
                     onDragOver={handleDragOver}
                     className={`
-                      rounded-lg border-2 border-dashed p-4 transition-all duration-200
+                      rounded-xl border-2 border-dashed p-4 transition-all duration-300
                       ${draggedResource 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border bg-card"
+                        ? "border-primary bg-primary/5 shadow-lg drop-zone-active" 
+                        : "border-border bg-card hover:border-muted-foreground/30"
                       }
                     `}
                   >
                     {/* Cold Spot Header */}
                     <div className="flex items-start gap-3 mb-3">
-                      <div className="p-1.5 rounded bg-amber-100">
-                        <AlertTriangle className="h-4 w-4 text-amber-600" />
-                      </div>
+                      <motion.div 
+                        animate={draggedResource ? { scale: [1, 1.1, 1] } : {}}
+                        transition={{ repeat: draggedResource ? Infinity : 0, duration: 1 }}
+                        className="p-2 rounded-lg bg-cold-spot/10"
+                      >
+                        <AlertTriangle className="h-4 w-4 text-cold-spot" />
+                      </motion.div>
                       <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-foreground">{coldSpot.name}</h4>
-                        <p className="text-xs text-muted-foreground">
-                          Pop: {coldSpot.population.toLocaleString()}  •  {coldSpot.nearestFacilityKm}km to care
-                        </p>
+                        <h4 className="text-sm font-bold text-foreground">{coldSpot.name}</h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                            Pop: {coldSpot.population.toLocaleString()}
+                          </span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-cold-spot/10 text-cold-spot">
+                            {coldSpot.nearestFacilityKm}km gap
+                          </span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Planned Resources */}
-                    {hasResources ? (
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground">Planned Resources:</p>
-                        {deployment.resources.map((resource) => (
-                          <div 
-                            key={resource.id}
-                            className="flex items-center gap-2 text-sm text-foreground bg-background rounded px-2 py-1.5 border border-border"
-                          >
-                            <Check className="h-3.5 w-3.5 text-emerald-600" />
-                            <span className="flex-1 truncate">{resource.name}</span>
-                            <button
-                              onClick={() => removeResource(coldSpot.id, resource.id)}
-                              className="text-muted-foreground hover:text-destructive transition-colors"
+                    <AnimatePresence mode="popLayout">
+                      {hasResources ? (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="space-y-2"
+                        >
+                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                            Planned Resources:
+                          </p>
+                          {deployment.resources.map((resource) => (
+                            <motion.div 
+                              key={resource.id}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              className="flex items-center gap-2 text-sm text-foreground bg-teal/5 border border-teal/20 rounded-lg px-3 py-2"
                             >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-4 text-center">
-                        <MapPin className="h-6 w-6 text-muted-foreground/50 mb-1" />
-                        <p className="text-xs text-muted-foreground">Drop resources here</p>
-                      </div>
-                    )}
-                  </div>
+                              <Check className="h-3.5 w-3.5 text-teal" />
+                              <span className="flex-1 truncate font-medium">{resource.name}</span>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => removeResource(coldSpot.id, resource.id)}
+                                className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded hover:bg-destructive/10"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </motion.button>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="flex flex-col items-center justify-center py-6 text-center"
+                        >
+                          <motion.div
+                            animate={draggedResource ? { 
+                              y: [0, -5, 0],
+                              scale: [1, 1.1, 1]
+                            } : {}}
+                            transition={{ repeat: draggedResource ? Infinity : 0, duration: 0.8 }}
+                          >
+                            <MapPin className={`h-8 w-8 mb-2 ${draggedResource ? 'text-primary' : 'text-muted-foreground/30'}`} />
+                          </motion.div>
+                          <p className={`text-xs ${draggedResource ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                            {draggedResource ? "Release to deploy here" : "Drop resources here"}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
                 );
               })}
             </div>
           </ScrollArea>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
