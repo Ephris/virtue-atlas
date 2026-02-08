@@ -34,18 +34,22 @@ const stats = [
 
 const StatsBar = () => {
   return (
-    <div className="grid grid-cols-2 gap-2 p-2 sm:gap-3 sm:p-3 md:p-4 lg:grid-cols-4">
+    <div className="grid grid-cols-4 gap-1.5 px-2 py-1.5 sm:gap-2 sm:px-3 sm:py-2 border-b border-border bg-muted/30">
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="flex items-center gap-2 sm:gap-3 rounded-lg border border-border bg-card p-2 sm:p-3"
+          className="flex items-center gap-1.5 sm:gap-2 rounded-md border border-border bg-card px-2 py-1.5 sm:px-3 sm:py-2"
         >
-          <div className={`flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg ${stat.bg}`}>
-            <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`} />
+          <div className={`flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-md ${stat.bg}`}>
+            <stat.icon className={`h-3 w-3 sm:h-4 sm:w-4 ${stat.color}`} />
           </div>
-          <div className="min-w-0">
-            <p className="text-base sm:text-xl font-bold text-foreground truncate">{stat.value}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{stat.label}</p>
+          <div className="min-w-0 hidden sm:block">
+            <p className="text-sm sm:text-base font-bold text-foreground leading-tight">{stat.value}</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{stat.label}</p>
+          </div>
+          {/* Mobile: just value */}
+          <div className="min-w-0 sm:hidden">
+            <p className="text-xs font-bold text-foreground">{stat.value}</p>
           </div>
         </div>
       ))}

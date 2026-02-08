@@ -20,40 +20,40 @@ const PlanningPanel = () => {
   };
 
   return (
-    <div className="border-t border-border bg-card p-3 md:p-4">
-      <div className="mb-2 md:mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div>
-          <h3 className="text-xs sm:text-sm font-semibold text-foreground">Resource Planning</h3>
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground">
-            Drag resources onto the map
-          </p>
-        </div>
-        <Button size="sm" className="gap-1.5 w-fit" onClick={handleSavePlan}>
-          <Save className="h-3.5 w-3.5" />
-          <span className="text-xs">Save Plan</span>
-        </Button>
-      </div>
-
-      <div className="flex flex-wrap gap-1.5 md:gap-2">
-        {draggableResources.map((r) => (
-          <div
-            key={r.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, r.id)}
-            className="resource-draggable flex items-center gap-1.5 md:gap-2 rounded-lg border border-border bg-muted px-2 md:px-3 py-1.5 md:py-2"
-          >
-            <GripVertical className="h-3 w-3 text-muted-foreground hidden sm:block" />
-            <span className="text-sm md:text-base">{r.icon}</span>
-            <span className="text-[10px] md:text-xs font-medium text-foreground">{r.label}</span>
+    <div className="border-t border-border bg-card px-3 py-2 md:px-4 md:py-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-3">
+          <div>
+            <h3 className="text-xs font-semibold text-foreground">Resource Planning</h3>
+            <p className="text-[10px] text-muted-foreground hidden sm:block">
+              Drag onto map
+            </p>
           </div>
-        ))}
+          <div className="flex flex-wrap gap-1">
+            {draggableResources.map((r) => (
+              <div
+                key={r.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, r.id)}
+                className="resource-draggable flex items-center gap-1 rounded border border-border bg-muted px-1.5 py-1"
+              >
+                <GripVertical className="h-2.5 w-2.5 text-muted-foreground hidden sm:block" />
+                <span className="text-sm">{r.icon}</span>
+                <span className="text-[10px] font-medium text-foreground hidden md:inline">{r.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {savedPlans > 0 && (
+            <span className="text-[10px] text-teal">✓ {savedPlans} saved</span>
+          )}
+          <Button size="sm" className="gap-1 h-7 px-2" onClick={handleSavePlan}>
+            <Save className="h-3 w-3" />
+            <span className="text-[10px] hidden sm:inline">Save</span>
+          </Button>
+        </div>
       </div>
-
-      {savedPlans > 0 && (
-        <p className="mt-2 text-[10px] md:text-[11px] text-teal">
-          ✓ {savedPlans} plan{savedPlans > 1 ? "s" : ""} saved
-        </p>
-      )}
     </div>
   );
 };
