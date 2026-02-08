@@ -204,18 +204,17 @@ const ChatConsole = () => {
         </div>
       </div>
 
-      {/* Messages - scrollable (includes Quick Queries inside scroll) */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-        {/* Quick Queries - inside scroll area */}
-        <div className="sticky top-0 z-10 bg-card border-b border-border">
-          <QuickQueryBar
-            queries={quickQueries}
-            onQueryClick={handleSend}
-            disabled={isLoading}
-          />
-        </div>
+      {/* Quick Queries - fixed below header */}
+      <div className="shrink-0 border-b border-border">
+        <QuickQueryBar
+          queries={quickQueries}
+          onQueryClick={handleSend}
+          disabled={isLoading}
+        />
+      </div>
 
-        {/* Messages */}
+      {/* Messages - scrollable */}
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
         <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
           <AnimatePresence mode="popLayout">
             {messages.map((msg) => (

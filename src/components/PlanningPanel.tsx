@@ -226,20 +226,20 @@ const PlanningPanel = () => {
         </div>
       </div>
 
-      {/* Content - fills remaining space, stack on mobile */}
-      <div className="flex flex-col sm:flex-row flex-1 min-h-0 overflow-hidden">
+      {/* Content - side by side on all screens */}
+      <div className="flex flex-row flex-1 min-h-0 overflow-hidden">
         {/* Left - Resource List */}
-        <div className="sm:w-1/2 flex flex-col border-b sm:border-b-0 sm:border-r border-border overflow-hidden min-h-0 flex-1 sm:flex-initial">
-          <div className="shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 border-b border-border bg-muted/30 flex items-center justify-between">
-            <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Available Resources</p>
+        <div className="w-1/2 flex flex-col border-r border-border overflow-hidden min-h-0">
+          <div className="shrink-0 px-2 py-1.5 border-b border-border bg-muted/30 flex items-center justify-between">
+            <p className="text-[10px] font-medium text-muted-foreground truncate">Resources</p>
             <Button
               size="sm"
               variant="ghost"
-              className="h-5 sm:h-6 px-1.5 sm:px-2 text-[10px] sm:text-xs gap-0.5 sm:gap-1"
+              className="h-5 px-1.5 text-[10px] gap-0.5"
               onClick={() => setShowAddForm(!showAddForm)}
             >
-              <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-              Add
+              <Plus className="h-2.5 w-2.5" />
+              <span className="hidden sm:inline">Add</span>
             </Button>
           </div>
 
@@ -250,22 +250,22 @@ const PlanningPanel = () => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="shrink-0 p-2 sm:p-3 border-b border-border bg-muted/20 space-y-1.5 sm:space-y-2"
+                className="shrink-0 p-2 border-b border-border bg-muted/20 space-y-1.5"
               >
                 <Input
-                  placeholder="Resource name (e.g., Dr. John Smith)"
+                  placeholder="Name"
                   value={newResource.name}
                   onChange={(e) => setNewResource(prev => ({ ...prev, name: e.target.value }))}
-                  className="h-7 sm:h-8 text-[10px] sm:text-xs"
+                  className="h-6 text-[10px]"
                 />
-                <div className="flex gap-1.5 sm:gap-2">
+                <div className="flex gap-1">
                   <Select
                     value={newResource.type}
                     onValueChange={(value: DraggableResource["type"]) => 
                       setNewResource(prev => ({ ...prev, type: value }))
                     }
                   >
-                    <SelectTrigger className="h-7 sm:h-8 text-[10px] sm:text-xs flex-1">
+                    <SelectTrigger className="h-6 text-[10px] flex-1">
                       <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border border-border z-50">
@@ -281,15 +281,15 @@ const PlanningPanel = () => {
                     placeholder="Specialty"
                     value={newResource.specialty}
                     onChange={(e) => setNewResource(prev => ({ ...prev, specialty: e.target.value }))}
-                    className="h-7 sm:h-8 text-[10px] sm:text-xs flex-1"
+                    className="h-6 text-[10px] flex-1"
                   />
                 </div>
-                <div className="flex gap-1.5 sm:gap-2">
-                  <Button size="sm" variant="outline" className="h-6 sm:h-7 text-[10px] sm:text-xs flex-1" onClick={() => setShowAddForm(false)}>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="outline" className="h-5 text-[9px] flex-1 px-1" onClick={() => setShowAddForm(false)}>
                     Cancel
                   </Button>
-                  <Button size="sm" className="h-6 sm:h-7 text-[10px] sm:text-xs flex-1" onClick={handleAddResource}>
-                    Add Resource
+                  <Button size="sm" className="h-5 text-[9px] flex-1 px-1" onClick={handleAddResource}>
+                    Add
                   </Button>
                 </div>
               </motion.div>
@@ -297,50 +297,36 @@ const PlanningPanel = () => {
           </AnimatePresence>
 
           <ScrollArea className="flex-1 min-h-0">
-            <div className="p-2 sm:p-3 space-y-1.5 sm:space-y-2">
+            <div className="p-1.5 space-y-1">
               <AnimatePresence>
                 {resources.map((resource, index) => {
                   const isDeployed = resource.status === "deployed" || isResourceDeployed(resource.id);
                   return (
                     <motion.div
                       key={resource.id}
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ delay: index * 0.03 }}
                       draggable={!isDeployed}
                       onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, resource)}
                       onDragEnd={handleDragEnd}
-                      whileHover={!isDeployed ? { scale: 1.01, x: 4 } : {}}
                       className={`
-                        flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl border bg-card
+                        flex items-center gap-1.5 p-1.5 rounded-md border bg-card
                         ${isDeployed 
                           ? "opacity-50 cursor-not-allowed border-border" 
-                          : "cursor-grab hover:border-primary/40 hover:shadow-md active:cursor-grabbing border-border"
+                          : "cursor-grab hover:border-primary/40 active:cursor-grabbing border-border"
                         }
-                        transition-all duration-200
+                        transition-all duration-150
                       `}
                     >
-                      <GripVertical className={`h-3 w-3 sm:h-4 sm:w-4 shrink-0 ${isDeployed ? "text-muted" : "text-muted-foreground"}`} />
-                      <motion.div 
-                        whileHover={!isDeployed ? { rotate: [0, -10, 10, 0] } : {}}
-                        className={`p-1.5 sm:p-2.5 rounded-md sm:rounded-lg shrink-0 ${getIconBgColor(resource.type)}`}
-                      >
-                        <div className="h-4 w-4 sm:h-5 sm:w-5">{getResourceIcon(resource.type)}</div>
-                      </motion.div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] sm:text-sm font-semibold text-foreground truncate">{resource.name}</p>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{resource.specialty}</p>
+                      <GripVertical className={`h-3 w-3 shrink-0 ${isDeployed ? "text-muted" : "text-muted-foreground"}`} />
+                      <div className={`p-1 rounded shrink-0 ${getIconBgColor(resource.type)}`}>
+                        <div className="h-3 w-3">{getResourceIcon(resource.type)}</div>
                       </div>
-                      <Badge 
-                        variant={isDeployed ? "secondary" : "outline"}
-                        className={`shrink-0 text-[8px] sm:text-[10px] px-1 sm:px-1.5 ${
-                          isDeployed 
-                            ? "bg-muted text-muted-foreground" 
-                            : "border-teal/30 bg-teal/10 text-teal font-medium"
-                        }`}
-                      >
-                        {isDeployed ? "Deployed" : "Available"}
-                      </Badge>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-medium text-foreground truncate">{resource.name}</p>
+                        <p className="text-[9px] text-muted-foreground truncate">{resource.specialty}</p>
+                      </div>
                     </motion.div>
                   );
                 })}
@@ -350,12 +336,12 @@ const PlanningPanel = () => {
         </div>
 
         {/* Right - Cold Spot Drop Zones */}
-        <div className="sm:w-1/2 flex flex-col overflow-hidden min-h-0 flex-1 sm:flex-initial">
-          <div className="shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 border-b border-border bg-muted/30">
-            <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Cold Spot Targets</p>
+        <div className="w-1/2 flex flex-col overflow-hidden min-h-0">
+          <div className="shrink-0 px-2 py-1.5 border-b border-border bg-muted/30">
+            <p className="text-[10px] font-medium text-muted-foreground truncate">Cold Spots</p>
           </div>
           <ScrollArea className="flex-1 min-h-0">
-            <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
+            <div className="p-1.5 space-y-1.5">
               {coldSpots.slice(0, 3).map((coldSpot, index) => {
                 const deployment = deployments.find(d => d.coldSpotId === coldSpot.id);
                 const hasResources = deployment && deployment.resources.length > 0;
@@ -363,36 +349,32 @@ const PlanningPanel = () => {
                 return (
                   <motion.div
                     key={coldSpot.id}
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.05 }}
                     onDrop={(e) => handleDrop(e, coldSpot)}
                     onDragOver={handleDragOver}
                     className={`
-                      rounded-lg sm:rounded-xl border-2 border-dashed p-2.5 sm:p-4 transition-all duration-300
+                      rounded-md border-2 border-dashed p-2 transition-all duration-200
                       ${draggedResource 
-                        ? "border-primary bg-primary/5 shadow-lg drop-zone-active" 
-                        : "border-border bg-card hover:border-muted-foreground/30"
+                        ? "border-primary bg-primary/5" 
+                        : "border-border bg-card"
                       }
                     `}
                   >
                     {/* Cold Spot Header */}
-                    <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
-                      <motion.div 
-                        animate={draggedResource ? { scale: [1, 1.1, 1] } : {}}
-                        transition={{ repeat: draggedResource ? Infinity : 0, duration: 1 }}
-                        className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-cold-spot/10 shrink-0"
-                      >
-                        <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cold-spot" />
-                      </motion.div>
+                    <div className="flex items-start gap-1.5 mb-1.5">
+                      <div className="p-1 rounded bg-cold-spot/10 shrink-0">
+                        <AlertTriangle className="h-3 w-3 text-cold-spot" />
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs sm:text-sm font-bold text-foreground truncate">{coldSpot.name}</h4>
-                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-0.5">
-                          <span className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                            Pop: {coldSpot.population.toLocaleString()}
+                        <h4 className="text-[10px] font-bold text-foreground truncate">{coldSpot.name}</h4>
+                        <div className="flex flex-wrap gap-0.5 mt-0.5">
+                          <span className="text-[8px] px-1 py-0.5 rounded bg-muted text-muted-foreground">
+                            {(coldSpot.population / 1000).toFixed(0)}k
                           </span>
-                          <span className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded bg-cold-spot/10 text-cold-spot">
-                            {coldSpot.nearestFacilityKm}km gap
+                          <span className="text-[8px] px-1 py-0.5 rounded bg-cold-spot/10 text-cold-spot">
+                            {coldSpot.nearestFacilityKm}km
                           </span>
                         </div>
                       </div>
@@ -400,57 +382,40 @@ const PlanningPanel = () => {
 
                     {/* Planned Resources */}
                     <AnimatePresence mode="popLayout">
-                      {hasResources ? (
-                        <motion.div 
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          className="space-y-1.5 sm:space-y-2"
-                        >
-                          <p className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
-                            Planned Resources:
-                          </p>
-                          {deployment.resources.map((resource) => (
-                            <motion.div 
-                              key={resource.id}
-                              initial={{ opacity: 0, scale: 0.8 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.8 }}
-                              className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-foreground bg-teal/5 border border-teal/20 rounded-md sm:rounded-lg px-2 sm:px-3 py-1.5 sm:py-2"
-                            >
-                              <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-teal shrink-0" />
-                              <span className="flex-1 truncate font-medium">{resource.name}</span>
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => removeResource(coldSpot.id, resource.id)}
-                                className="text-muted-foreground hover:text-destructive transition-colors p-0.5 sm:p-1 rounded hover:bg-destructive/10 shrink-0"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </motion.button>
-                            </motion.div>
-                          ))}
-                        </motion.div>
-                      ) : (
+                      {hasResources && (
                         <motion.div 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="flex flex-col items-center justify-center py-6 text-center"
+                          className="space-y-1 mt-1.5 pt-1.5 border-t border-border"
                         >
-                          <motion.div
-                            animate={draggedResource ? { 
-                              y: [0, -5, 0],
-                              scale: [1, 1.1, 1]
-                            } : {}}
-                            transition={{ repeat: draggedResource ? Infinity : 0, duration: 0.8 }}
-                          >
-                            <MapPin className={`h-8 w-8 mb-2 ${draggedResource ? 'text-primary' : 'text-muted-foreground/30'}`} />
-                          </motion.div>
-                          <p className={`text-xs ${draggedResource ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                            {draggedResource ? "Release to deploy here" : "Drop resources here"}
-                          </p>
+                          {deployment.resources.map((resource) => (
+                            <motion.div 
+                              key={resource.id}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              className="flex items-center gap-1 text-[9px] text-foreground bg-teal/5 border border-teal/20 rounded px-1.5 py-1"
+                            >
+                              <Check className="h-2.5 w-2.5 text-teal shrink-0" />
+                              <span className="flex-1 truncate">{resource.name}</span>
+                              <button
+                                onClick={() => removeResource(coldSpot.id, resource.id)}
+                                className="text-muted-foreground hover:text-destructive p-0.5 shrink-0"
+                              >
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </motion.div>
+                          ))}
                         </motion.div>
                       )}
                     </AnimatePresence>
+
+                    {/* Empty drop hint */}
+                    {!hasResources && (
+                      <div className="flex items-center justify-center py-2">
+                        <MapPin className="h-3 w-3 text-muted-foreground/40" />
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}
