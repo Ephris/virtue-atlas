@@ -162,7 +162,7 @@ const IntelligenceMap = ({ onFacilityClick, selectedFacility }: IntelligenceMapP
         ))}
       </MapContainer>
 
-      {/* Map controls overlay */}
+      {/* Map controls overlay - positioned top-left, stacked vertically */}
       <div className="absolute left-3 top-3 z-[1000] flex flex-col gap-2">
         <Button
           size="sm"
@@ -177,33 +177,33 @@ const IntelligenceMap = ({ onFacilityClick, selectedFacility }: IntelligenceMapP
           )}
           <span className="text-xs">Cold Spots</span>
         </Button>
-      </div>
 
-      {/* Legend */}
-      <div className="absolute bottom-3 left-3 z-[1000] rounded-lg border border-border bg-card/95 p-3 shadow-md backdrop-blur-sm">
-        <div className="flex items-center gap-1 text-xs font-medium text-foreground mb-2">
-          <Layers className="h-3.5 w-3.5" />
-          Legend
-        </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-hub-blue" /> Hospital
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#60A5FA" }} /> Clinic
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#818CF8" }} /> Lab
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#A78BFA" }} /> Pharmacy
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-cold-spot opacity-40" /> Cold Spot
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-teal" /> Deployed
-          </span>
+        {/* Legend - moved inside controls to avoid overlap with PlanningPanel */}
+        <div className="rounded-lg border border-border bg-card/95 p-2.5 shadow-md backdrop-blur-sm max-w-[180px]">
+          <div className="flex items-center gap-1 text-xs font-medium text-foreground mb-1.5">
+            <Layers className="h-3 w-3" />
+            Legend
+          </div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-hub-blue shrink-0" /> Hospital
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: "#60A5FA" }} /> Clinic
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: "#818CF8" }} /> Lab
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: "#A78BFA" }} /> Pharmacy
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-cold-spot opacity-40 shrink-0" /> Cold Spot
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-teal shrink-0" /> Deployed
+            </span>
+          </div>
         </div>
       </div>
     </div>
