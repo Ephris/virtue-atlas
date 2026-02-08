@@ -171,18 +171,18 @@ const ChatConsole = () => {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-card">
       {/* Header - fixed height */}
-      <div className="shrink-0 border-b border-border px-4 py-3 bg-gradient-to-r from-card to-muted/30">
+      <div className="shrink-0 border-b border-border px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-card to-muted/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-sm">
-              <Bot className="h-4 w-4 text-primary-foreground" />
+            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-primary shadow-sm">
+              <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" />
             </div>
-            <div>
-              <h2 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+            <div className="min-w-0">
+              <h2 className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5 truncate">
                 Intelligence Console
-                <Sparkles className="h-3 w-3 text-amber" />
+                <Sparkles className="h-3 w-3 text-amber shrink-0" />
               </h2>
-              <p className="text-[11px] text-muted-foreground">Natural language queries • AI-powered analysis</p>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">Natural language queries • AI-powered analysis</p>
             </div>
           </div>
           
@@ -191,7 +191,7 @@ const ChatConsole = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+              className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${
                 responseTime < 3000
                   ? "bg-teal/10 text-teal"
                   : "bg-amber/10 text-amber"
@@ -204,47 +204,50 @@ const ChatConsole = () => {
         </div>
       </div>
 
-      {/* Quick Queries - fixed height */}
-      <div className="shrink-0">
-        <QuickQueryBar
-          queries={quickQueries}
-          onQueryClick={handleSend}
-          disabled={isLoading}
-        />
-      </div>
+      {/* Messages - scrollable (includes Quick Queries inside scroll) */}
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+        {/* Quick Queries - inside scroll area */}
+        <div className="sticky top-0 z-10 bg-card border-b border-border">
+          <QuickQueryBar
+            queries={quickQueries}
+            onQueryClick={handleSend}
+            disabled={isLoading}
+          />
+        </div>
 
-      {/* Messages - scrollable */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 space-y-4">
-        <AnimatePresence mode="popLayout">
-          {messages.map((msg) => (
-            <ChatMessage key={msg.id} message={msg} />
-          ))}
-        </AnimatePresence>
+        {/* Messages */}
+        <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+          <AnimatePresence mode="popLayout">
+            {messages.map((msg) => (
+              <ChatMessage key={msg.id} message={msg} />
+            ))}
+          </AnimatePresence>
 
-        {/* Loading State */}
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-start gap-2"
-          >
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary">
-              <Bot className="h-3 w-3 text-primary-foreground" />
-            </div>
-            <div className="rounded-lg bg-muted px-3 py-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                <span>Analyzing query...</span>
+          {/* Loading State */}
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-start gap-2"
+            >
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary">
+                <Bot className="h-3 w-3 text-primary-foreground" />
               </div>
-              <div className="mt-2 space-y-1">
-                <div className="h-2 w-48 animate-pulse rounded bg-muted-foreground/20" />
-                <div className="h-2 w-36 animate-pulse rounded bg-muted-foreground/20" />
+              <div className="rounded-lg bg-muted px-3 py-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span>Analyzing query...</span>
+                </div>
+                <div className="mt-2 space-y-1">
+                  <div className="h-2 w-48 animate-pulse rounded bg-muted-foreground/20" />
+                  <div className="h-2 w-36 animate-pulse rounded bg-muted-foreground/20" />
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
 
-        <div ref={bottomRef} />
+          <div ref={bottomRef} />
+        </div>
       </div>
 
       {/* Input - fixed height */}
