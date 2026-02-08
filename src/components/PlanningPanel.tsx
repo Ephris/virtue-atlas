@@ -19,10 +19,12 @@
  * ✓ Clear button works
  */
 
-import { GripVertical, User, Stethoscope, Package, X, Check, MapPin, AlertTriangle, Sparkles } from "lucide-react";
+import { GripVertical, User, Stethoscope, Package, X, Check, MapPin, AlertTriangle, Sparkles, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { draggableResources, coldSpots, DraggableResource, ColdSpot } from "@/data/mockData";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { draggableResources as initialResources, coldSpots, DraggableResource, ColdSpot } from "@/data/mockData";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -64,8 +66,15 @@ const getIconBgColor = (type: string) => {
 };
 
 const PlanningPanel = () => {
+  const [resources, setResources] = useState<DraggableResource[]>(initialResources);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [draggedResource, setDraggedResource] = useState<DraggableResource | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newResource, setNewResource] = useState({
+    name: "",
+    type: "doctor" as DraggableResource["type"],
+    specialty: "",
+  });
 
   const handleDragStart = (e: React.DragEvent, resource: DraggableResource) => {
     e.dataTransfer.setData("resourceId", resource.id);
@@ -80,7 +89,7 @@ const PlanningPanel = () => {
   const handleDrop = (e: React.DragEvent, coldSpot: ColdSpot) => {
     e.preventDefault();
     const resourceId = e.dataTransfer.getData("resourceId");
-    const resource = draggableResources.find(r => r.id === resourceId);
+    const resource = resources.find(r => r.id === resourceId);
     
     if (resource && resource.status === "available") {
       setDeployments(prev => {
@@ -146,6 +155,30 @@ const PlanningPanel = () => {
     toast.info("All deployments cleared");
   };
 
+  const handleAddResource = () => {
+    if (!newResource.name.trim() || !newResource.specialty.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    const resource: DraggableResource = {
+      id: `r${Date.now()}`,
+      type: newResource.type,
+      name: newResource.name.trim(),
+      specialty: newResource.specialty.trim(),
+      status: "available",
+      icon: newResource.type === "doctor" || newResource.type === "nurse" ? "user" : 
+            newResource.type === "equipment" ? "stethoscope" : "package",
+    };
+
+    setResources(prev => [...prev, resource]);
+    setNewResource({ name: "", type: "doctor", specialty: "" });
+    setShowAddForm(false);
+    toast.success("Resource added!", {
+      description: `${resource.name} is now available for deployment.`,
+    });
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -197,13 +230,76 @@ const PlanningPanel = () => {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Left - Resource List */}
         <div className="w-1/2 flex flex-col border-r border-border overflow-hidden">
-          <div className="shrink-0 px-3 py-2 border-b border-border bg-muted/30">
+          <div className="shrink-0 px-3 py-2 border-b border-border bg-muted/30 flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Available Resources</p>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 px-2 text-xs gap-1"
+              onClick={() => setShowAddForm(!showAddForm)}
+            >
+              <Plus className="h-3 w-3" />
+              Add
+            </Button>
           </div>
+
+          {/* Add Resource Form */}
+          <AnimatePresence>
+            {showAddForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="shrink-0 p-3 border-b border-border bg-muted/20 space-y-2"
+              >
+                <Input
+                  placeholder="Resource name (e.g., Dr. John Smith)"
+                  value={newResource.name}
+                  onChange={(e) => setNewResource(prev => ({ ...prev, name: e.target.value }))}
+                  className="h-8 text-xs"
+                />
+                <div className="flex gap-2">
+                  <Select
+                    value={newResource.type}
+                    onValueChange={(value: DraggableResource["type"]) => 
+                      setNewResource(prev => ({ ...prev, type: value }))
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs flex-1">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border border-border z-50">
+                      <SelectItem value="doctor">Doctor</SelectItem>
+                      <SelectItem value="nurse">Nurse</SelectItem>
+                      <SelectItem value="surgeon">Surgeon</SelectItem>
+                      <SelectItem value="ambulance">Ambulance</SelectItem>
+                      <SelectItem value="equipment">Equipment</SelectItem>
+                      <SelectItem value="supply">Supply</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    placeholder="Specialty"
+                    value={newResource.specialty}
+                    onChange={(e) => setNewResource(prev => ({ ...prev, specialty: e.target.value }))}
+                    className="h-8 text-xs flex-1"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="h-7 text-xs flex-1" onClick={() => setShowAddForm(false)}>
+                    Cancel
+                  </Button>
+                  <Button size="sm" className="h-7 text-xs flex-1" onClick={handleAddResource}>
+                    Add Resource
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <ScrollArea className="flex-1">
             <div className="p-3 space-y-2">
               <AnimatePresence>
-                {draggableResources.map((resource, index) => {
+                {resources.map((resource, index) => {
                   const isDeployed = resource.status === "deployed" || isResourceDeployed(resource.id);
                   return (
                     <motion.div
